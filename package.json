@@ -1,0 +1,10 @@
+{
+  "name": "nas-design-system",
+  "version": "2.1.0",
+  "private": true,
+  "description": "Semantic colors, tactile controls and pixel artwork.",
+  "scripts": {
+    "test": "node tools/verify.mjs",
+    "build": "node tools/build.mjs"
+  }
+}

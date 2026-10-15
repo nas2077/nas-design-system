@@ -1,0 +1,9 @@
+# Commands
+
+Searchable actions with keyboard navigation. Press Ctrl K.
+
+Load `kit/nas.css` and `kit/nas.js`. Orbi examples also require `kit/orbi.js` and mini icons require `kit/orbi-icons.js`.
+
+```html
+<button class="n-button n-button--secondary" data-n-open="commands">Open commands</button><dialog class="n-dialog n-commands" id="commands" data-n-command><label class="n-field">Find an action<input data-n-filter placeholder="Search commands"></label><div class="n-command-list"><button class="n-command" data-n-item data-n-toast="Project saved">Save project <kbd class="n-kbd">Enter</kbd></button><button class="n-command" data-n-item data-n-close>Close commands</button><p data-n-empty hidden>No matching actions.</p></div></dialog>
+```
