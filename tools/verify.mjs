@@ -25,6 +25,18 @@ const expected=JSON.parse(fs.readFileSync(path.join(root,'docs/pixel-baseline.js
 assert.equal(hash.digest('hex'),expected.sha256);assert.equal(renderings,expected.renderings);
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'design-system.json'),'utf8'));
 for(const name of manifest.assets)assert.ok(fs.existsSync(path.join(root,name)),name);
+// Every pixel SVG carries its own colors: a shape without fill needs a colored class in <style> (else it renders black), and frame classes (o0, g0…) need @keyframes.
+const svgs=fs.readdirSync(path.join(root,'assets'),{recursive:true}).filter(name=>name.endsWith('.svg'));
+for(const name of svgs){
+ const svg=fs.readFileSync(path.join(root,'assets',name),'utf8'),style=[...svg.matchAll(/<style>([\s\S]*?)<\/style>/g)].map(m=>m[1]).join('\n');
+ const colored=new Set([...style.matchAll(/\.([\w-]+)\s*\{[^}]*\bfill\s*:/g)].map(m=>m[1]));
+ for(const [tag] of svg.matchAll(/<(?:path|rect|circle|polygon)\b[^>]*>/g)){
+  if(/\sfill=/.test(tag))continue;
+  const classes=(tag.match(/\sclass="([^"]*)"/)?.[1]||'').split(/\s+/).filter(Boolean);
+  assert.ok(classes.some(c=>colored.has(c)),`${name}: shape without color (${classes.join(' ')||'no class'})`);
+ }
+ if(/\sclass="[^"]*\b[og]\d+\b/.test(svg))assert.match(style,/@keyframes/,`${name}: animation frames without @keyframes`);
+}
 assert.equal(manifest.components.length,22);
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 assert.ok(html.includes('lang="en"'));
@@ -32,4 +44,4 @@ assert.equal([...html.matchAll(/<article class="component"/g)].length,22);
 for(const match of html.matchAll(/(?:src|href)="([^"#]+)"/g)){
  if(!/^https?:/.test(match[1]))assert.ok(fs.existsSync(path.join(root,match[1])),match[1]);
 }
-console.log(`PASS: English API, ${renderings} pixel renders, 22 component examples and all catalog assets.`);
+console.log(`PASS: English API, ${renderings} pixel renders, ${svgs.length} colored SVGs, 22 component examples and all catalog assets.`);
